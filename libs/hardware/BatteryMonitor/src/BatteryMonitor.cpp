@@ -556,7 +556,7 @@ bool BatteryMonitor::hasGaugeBackend() const {
 }
 
 bool BatteryMonitor::hasM5Pm1Backend() const {
-  return BoardConfig::isM5StackPaperColor() || BoardConfig::isPaperMono();
+  return BoardConfig::isM5StackPaperColor() || BoardConfig::isPaperMono() || BoardConfig::isPaperDiy();
 }
 
 uint16_t BatteryMonitor::readPercentage() const {
@@ -846,6 +846,11 @@ bool BatteryMonitor::readM5Pm1Status(Status& status) const {
   // Product semantics for Paper Mono: external supply present means charging.
   status.chargingKnown = status.externalPowerKnown;
   status.charging = status.externalPower;
+  if (BoardConfig::isPaperDiy()) {
+    uint8_t inputs = 0;
+    status.chargingKnown = freeink::m5pm1::readReg(freeink::m5pm1::REG_GPIO_IN, &inputs);
+    status.charging = status.chargingKnown && (inputs & 0x08) == 0;
+  }
   return status.percentageKnown || status.millivoltsKnown || status.externalPowerKnown;
 }
 

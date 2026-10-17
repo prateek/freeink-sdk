@@ -399,6 +399,12 @@ PanelDriver& lgfxEpdDriver() {
   static LgfxEpdDriver instance(lilygoT5S3LgfxConfig());
   return instance;
 }
+#elif FREEINK_DEVICE_PAPERDIY && !defined(FREEINK_LGFX_EPD_CONFIG)
+const LgfxEpdConfig& paperDiyLgfxConfig();
+PanelDriver& lgfxEpdDriver() {
+  static LgfxEpdDriver instance(paperDiyLgfxConfig());
+  return instance;
+}
 #elif FREEINK_DEVICE_PAPERS3 && !defined(FREEINK_LGFX_EPD_CONFIG)
 const LgfxEpdConfig& m5PaperS3LgfxConfig();
 PanelDriver& lgfxEpdDriver() {
