@@ -63,6 +63,9 @@
 #ifndef FREEINK_DEVICE_PAPERMONO
 #define FREEINK_DEVICE_PAPERMONO 0
 #endif
+#ifndef FREEINK_DEVICE_PAPERDIY
+#define FREEINK_DEVICE_PAPERDIY 0
+#endif
 #ifndef FREEINK_DEVICE_PAPERS3
 #define FREEINK_DEVICE_PAPERS3 0
 #endif
@@ -92,7 +95,7 @@
 // --- 2) Coherence: exactly one MCU family, at least one device ---------------
 #if !(FREEINK_DEVICE_X4 || FREEINK_DEVICE_X3 || FREEINK_DEVICE_X4PRO || FREEINK_DEVICE_X4CLASSIC || FREEINK_DEVICE_M5 || \
       FREEINK_DEVICE_MURPHY || FREEINK_DEVICE_DELINK || FREEINK_DEVICE_LILYGO || FREEINK_DEVICE_M5PAPER ||               \
-      FREEINK_DEVICE_STICKY || FREEINK_DEVICE_PAPERMONO || FREEINK_DEVICE_PAPERS3 || FREEINK_DEVICE_MURPHY_M4 ||         \
+      FREEINK_DEVICE_STICKY || FREEINK_DEVICE_PAPERMONO || FREEINK_DEVICE_PAPERDIY || FREEINK_DEVICE_PAPERS3 || FREEINK_DEVICE_MURPHY_M4 ||         \
       FREEINK_DEVICE_EEGO_A4 || FREEINK_DEVICE_ONEPAGE || FREEINK_DEVICE_WS397 || FREEINK_DEVICE_METALIO_EINK4 || \
       FREEINK_DEVICE_PICCO)
 #error \
@@ -107,7 +110,7 @@
 #define FREEINK_MCU_S3                                                                                    \
   (FREEINK_DEVICE_M5 || FREEINK_DEVICE_MURPHY || FREEINK_DEVICE_DELINK || FREEINK_DEVICE_LILYGO ||        \
    FREEINK_DEVICE_STICKY || FREEINK_DEVICE_X4PRO || FREEINK_DEVICE_X4CLASSIC || FREEINK_DEVICE_PAPERMONO ||  \
-   FREEINK_DEVICE_PAPERS3 || FREEINK_DEVICE_MURPHY_M4 || FREEINK_DEVICE_EEGO_A4 || FREEINK_DEVICE_WS397 || FREEINK_DEVICE_METALIO_EINK4 || \
+   FREEINK_DEVICE_PAPERDIY || FREEINK_DEVICE_PAPERS3 || FREEINK_DEVICE_MURPHY_M4 || FREEINK_DEVICE_EEGO_A4 || FREEINK_DEVICE_WS397 || FREEINK_DEVICE_METALIO_EINK4 || \
    FREEINK_DEVICE_PICCO)
 #define FREEINK_MCU_ESP32 (FREEINK_DEVICE_M5PAPER)
 #if (FREEINK_MCU_C3 + FREEINK_MCU_C61 + FREEINK_MCU_S3 + FREEINK_MCU_ESP32) != 1
@@ -180,7 +183,7 @@
 // LilyGo T5 S3 and M5Stack PaperS3: raw-parallel ED047TC1 via LovyanGFX (M5GFX).
 // External-bus driver; each board injects its own bus pins/power in an
 // LgfxEpdConfig (PaperS3's rails are plain GPIOs, LilyGo's ride a PMIC+expander).
-#if FREEINK_DEVICE_LILYGO || FREEINK_DEVICE_PAPERS3
+#if FREEINK_DEVICE_LILYGO || FREEINK_DEVICE_PAPERS3 || FREEINK_DEVICE_PAPERDIY
 #define FREEINK_DRIVER_LGFX_EPD 1
 #else
 #define FREEINK_DRIVER_LGFX_EPD 0
@@ -350,7 +353,7 @@
 // (The prebuilt Arduino-ESP32 libs disable BSS-in-PSRAM, so this is a runtime
 // heap allocation, not EXT_RAM_BSS_ATTR.)
 #ifndef FREEINK_FB_PSRAM
-#define FREEINK_FB_PSRAM (FREEINK_DEVICE_M5PAPER || FREEINK_DEVICE_PAPERMONO)
+#define FREEINK_FB_PSRAM (FREEINK_DEVICE_M5PAPER || FREEINK_DEVICE_PAPERMONO || FREEINK_DEVICE_PAPERDIY)
 #endif
 
 // SD transport. de-link (4-bit) and X4 Pro (1-bit) are wired for SDMMC; SdFat
@@ -415,6 +418,7 @@ enum class Board : uint8_t {
   M5PaperV11,
   Sticky,
   PaperMono,
+  PaperDiy,
   M5PaperS3,  // ESP32-S3 sibling of M5Paper v1.1: same ED047TC1 glass, no IT8951 — raw parallel via LovyanGFX
   EegoA4,     // EEGO Reader A4: ESP32-S3, UC8279C 768x552 SPI panel, GSLX680 touch, PCF8563 RTC
   OnePage,    // OnePage: ESP32-C61, SSD1677 800x480 SPI panel, 4-key ADC ladder + 3 side keys
@@ -1449,6 +1453,19 @@ constexpr BoardProfile M5PAPER_S3 = {
     1.2f,  // uiScale: 4.7" 960x540 touch (~234 PPI) — finger-sized chrome, like LilyGo/M5Paper
     {}};   // no power latch: the PMS150G self-latches; off = GPIO44 pulse (BoardPaperS3::powerOff)
 
+// M5Stack PaperDIY K159: ED047TC1 parallel EPD, two keys, M5PM1 power.
+constexpr BoardProfile PAPER_DIY = {
+    Board::PaperDiy, "paperdiy", InputStyle::DigitalTwoButton, DisplayController::LgfxEpd,
+    960, 540,
+    {PIN_UNASSIGNED, PIN_UNASSIGNED, PIN_UNASSIGNED, PIN_UNASSIGNED,
+     PIN_UNASSIGNED, PIN_UNASSIGNED, PIN_UNASSIGNED},
+    0,
+    {39, 40, 38, 47, PIN_UNASSIGNED, false, 0},
+    {PIN_UNASSIGNED, PIN_UNASSIGNED, PIN_UNASSIGNED, PIN_UNASSIGNED, 4, 3, PIN_UNASSIGNED, false},
+    PIN_UNASSIGNED, PIN_UNASSIGNED, 1.0f, PIN_UNASSIGNED,
+    NO_TOUCH, NO_FRONTLIGHT, NO_AUDIO, NO_LEDS, NO_FLIP, NO_SDMMC,
+    NO_GAUGE, NO_MIC, NO_SENSORS, 1.0f, {}};
+
 // --- EEGO Reader A4 — ESP32-S3 N16R8, UC8279C (768x552) + GSLX680 touch -------
 // CrossPoint fork device; pins/resolution/calibration from stock-firmware RE,
 // none hardware-confirmed. See docs/eego-a4-support.md.
@@ -2038,7 +2055,8 @@ constexpr uint32_t MAX_FRAMEBUFFER_BYTES = cmax(
                         FREEINK_DEVICE_X4CLASSIC ? panelBytes(XTEINK_X4_CLASSIC) : 0u))),
          cmax(cmax(FREEINK_DEVICE_STICKY ? panelBytes(STICKY) : 0u,
                    FREEINK_DEVICE_PAPERMONO ? panelBytes(PAPER_MONO) : 0u),
-              cmax(cmax(FREEINK_DEVICE_PAPERS3 ? panelBytes(M5PAPER_S3) : 0u,
+              cmax(cmax(cmax(FREEINK_DEVICE_PAPERDIY ? panelBytes(PAPER_DIY) : 0u,
+                             FREEINK_DEVICE_PAPERS3 ? panelBytes(M5PAPER_S3) : 0u),
                         FREEINK_DEVICE_MURPHY_M4 ? panelBytes(MURPHY_M4) : 0u),
                    cmax(cmax(FREEINK_DEVICE_EEGO_A4 ? panelBytes(EEGO_A4) : 0u,
                              FREEINK_DEVICE_ONEPAGE ? panelBytes(ONEPAGE) : 0u),
@@ -2073,6 +2091,8 @@ constexpr BoardProfile DEFAULT_DEVICE = DE_LINK;
 constexpr BoardProfile DEFAULT_DEVICE = LILYGO_T5S3;
 #elif FREEINK_DEVICE_M5PAPER
 constexpr BoardProfile DEFAULT_DEVICE = M5PAPER_V11;
+#elif FREEINK_DEVICE_PAPERDIY
+constexpr BoardProfile DEFAULT_DEVICE = PAPER_DIY;
 #elif FREEINK_DEVICE_PAPERS3
 constexpr BoardProfile DEFAULT_DEVICE = M5PAPER_S3;
 #elif FREEINK_DEVICE_STICKY
@@ -2164,6 +2184,11 @@ inline bool selectDevice(Board which) {
       ACTIVE = PAPER_MONO;
       return true;
 #endif
+#if FREEINK_DEVICE_PAPERDIY
+    case Board::PaperDiy:
+      ACTIVE = PAPER_DIY;
+      break;
+#endif
 #if FREEINK_DEVICE_PAPERS3
     case Board::M5PaperS3:
       ACTIVE = M5PAPER_S3;
@@ -2209,6 +2234,7 @@ inline bool isM5StackPaperColor() { return ACTIVE.board == Board::M5StackPaperCo
 inline bool isMurphyM3() { return ACTIVE.board == Board::MurphyM3; }
 inline bool isDeLink() { return ACTIVE.board == Board::DeLink; }
 inline bool isM5PaperV11() { return ACTIVE.board == Board::M5PaperV11; }
+inline bool isPaperDiy() { return ACTIVE.board == Board::PaperDiy; }
 inline bool isM5PaperS3() { return ACTIVE.board == Board::M5PaperS3; }
 inline bool isSticky() { return ACTIVE.board == Board::Sticky; }
 inline bool isX4Pro() { return ACTIVE.board == Board::XteinkX4Pro; }

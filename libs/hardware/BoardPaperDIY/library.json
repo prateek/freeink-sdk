@@ -1,0 +1,8 @@
+{
+  "name": "BoardPaperDIY",
+  "version": "0.1.0",
+  "description": "M5Stack PaperDIY parallel EPD and M5PM1 power support",
+  "dependencies": {"BoardConfig": "*", "EInkDisplay": "*"},
+  "platforms": "espressif32",
+  "frameworks": ["arduino"]
+}

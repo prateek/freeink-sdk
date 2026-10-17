@@ -29,6 +29,8 @@ constexpr uint8_t ADDR = 0x6E;
 #ifndef FREEINK_M5PM1_SDA
 #if FREEINK_DEVICE_PAPERMONO
 #define FREEINK_M5PM1_SDA 47
+#elif FREEINK_DEVICE_PAPERDIY
+#define FREEINK_M5PM1_SDA 41
 #else
 #define FREEINK_M5PM1_SDA 3
 #endif
@@ -36,6 +38,8 @@ constexpr uint8_t ADDR = 0x6E;
 #ifndef FREEINK_M5PM1_SCL
 #if FREEINK_DEVICE_PAPERMONO
 #define FREEINK_M5PM1_SCL 48
+#elif FREEINK_DEVICE_PAPERDIY
+#define FREEINK_M5PM1_SCL 42
 #else
 #define FREEINK_M5PM1_SCL 2
 #endif
@@ -54,6 +58,7 @@ constexpr uint8_t REG_WDT_CNT = 0x0A;    // seconds; 0 disables the PMIC watchdo
 constexpr uint8_t REG_SYS_CMD = 0x0C;    // KEY=0xA in high nibble; 1=off, 2=reset, 3=download
 constexpr uint8_t REG_GPIO_MODE = 0x10;  // 1 = output
 constexpr uint8_t REG_GPIO_OUT = 0x11;   // output level
+constexpr uint8_t REG_GPIO_IN = 0x12;
 constexpr uint8_t REG_GPIO_DRV = 0x13;   // 0 = push-pull
 constexpr uint8_t REG_GPIO_PULL0 = 0x14;
 constexpr uint8_t REG_GPIO_FUNC0 = 0x16;  // 0 = plain GPIO (vs alt function)
